@@ -1,0 +1,203 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_ENV: test
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          SKIP_ENV_VALIDATION: true
+
+      - name: Create Release
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: node
+          package-name: privacy-popup-shopify-app
+          token: ${{ secrets.GITHUB_TOKEN }}
+          include-component-in-tag: false
+
+      - name: Upload build artifacts to release
+        if: steps.release.outputs.released
+        run: |
+          gh release upload ${{ steps.release.outputs.tag }} \
+            --clobber \
+            build.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-release:
+    name: Deploy Release
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    environment:
+      name: production
+      url: https://privacy-popup.vercel.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+
+      - name: Alias deployment to production domain
+        run: |
+          vercel alias ${{ steps.deploy.outputs.url }} privacy-popup.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Update release with deployment info
+        run: |
+          gh release edit ${{ needs.release.outputs.tag }} \
+            --notes-file - <<EOF
+          ## 🚀 Deployment Information
+
+          **Production URL:** ${{ steps.deploy.outputs.url }}
+          **Deployed at:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Commit:** ${{ github.sha }}
+
+          $(gh release view ${{ needs.release.outputs.tag }} --json body -q .body)
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    needs: [release, deploy-release]
+    if: needs.release.outputs.released == 'true' && success()
+    steps:
+      - name: Send Slack notification
+        if: vars.SLACK_WEBHOOK_URL
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🎉 Privacy Popup v${{ needs.release.outputs.version }} has been released and deployed!\n\nView release: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.tag }}\nProduction URL: https://privacy-popup.vercel.app"}' \
+            ${{ vars.SLACK_WEBHOOK_URL }}
+
+      - name: Create GitHub Discussion
+        run: |
+          gh api graphql -f query='
+            mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+              createDiscussion(input: {
+                repositoryId: $repositoryId,
+                categoryId: $categoryId,
+                title: $title,
+                body: $body
+              }) {
+                discussion {
+                  url
+                }
+              }
+            }' \
+            -f repositoryId="${{ github.repository_id }}" \
+            -f categoryId="${{ vars.ANNOUNCEMENTS_CATEGORY_ID }}" \
+            -f title="🎉 Version ${{ needs.release.outputs.version }} Released" \
+            -f body="Privacy Popup v${{ needs.release.outputs.version }} has been released!
+
+          ## What's New
+          Check out the [release notes](https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.tag }}) for all the details.
+
+          ## Quick Links
+          - [Production App](https://privacy-popup.vercel.app)
+          - [Documentation](https://github.com/${{ github.repository }}#readme)
+          - [Support](mailto:support@example.com)
+
+          Happy coding! 🚀"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  post-release:
+    name: Post-Release Tasks
+    runs-on: ubuntu-latest
+    needs: [release, deploy-release]
+    if: needs.release.outputs.released == 'true' && success()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Update documentation
+        run: |
+          echo "Updating documentation for version ${{ needs.release.outputs.version }}"
+          # Add any documentation update scripts here
+
+      - name: Update Shopify Partner Dashboard
+        run: |
+          echo "Updating Shopify Partner Dashboard with new version"
+          # Add scripts to update app listing, if applicable
+
+      - name: Archive old versions
+        run: |
+          echo "Archiving old deployment artifacts"
+          # Clean up old artifacts or deployments if needed

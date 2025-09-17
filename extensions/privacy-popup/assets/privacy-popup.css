@@ -1,0 +1,207 @@
+/* Privacy Popup Styles */
+.privacy-popup-container {
+  position: fixed;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.privacy-popup {
+  background: var(--popup-bg-color, #ffffff);
+  color: var(--popup-text-color, #333333);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: var(--popup-max-width, 400px);
+  padding: var(--popup-padding, 20px);
+  z-index: var(--popup-z-index, 9999);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.privacy-popup[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.privacy-popup[aria-hidden="false"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Position variants */
+.privacy-popup--top {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+}
+
+.privacy-popup--top[aria-hidden="false"] {
+  transform: translateX(-50%) translateY(0);
+}
+
+.privacy-popup--bottom {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+}
+
+.privacy-popup--bottom[aria-hidden="false"] {
+  transform: translateX(-50%) translateY(0);
+}
+
+.privacy-popup--left {
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-20px);
+}
+
+.privacy-popup--left[aria-hidden="false"] {
+  transform: translateY(-50%) translateX(0);
+}
+
+.privacy-popup--right {
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) translateX(20px);
+}
+
+.privacy-popup--right[aria-hidden="false"] {
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Content styling */
+.privacy-popup__content {
+  margin: 0;
+  word-wrap: break-word;
+}
+
+.privacy-popup__link {
+  color: var(--popup-link-color, #007ace);
+  text-decoration: underline;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.privacy-popup__link:hover,
+.privacy-popup__link:focus {
+  opacity: 0.8;
+}
+
+.privacy-popup__actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.privacy-popup__button {
+  background: var(--popup-link-color, #007ace);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.privacy-popup__button:hover,
+.privacy-popup__button:focus {
+  background: var(--popup-link-color, #005a9e);
+  outline: 2px solid var(--popup-link-color, #007ace);
+  outline-offset: 2px;
+}
+
+.privacy-popup__button--secondary {
+  background: transparent;
+  color: var(--popup-text-color, #333333);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.privacy-popup__button--secondary:hover,
+.privacy-popup__button--secondary:focus {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.privacy-popup__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--popup-text-color, #333333);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  border-radius: 2px;
+}
+
+.privacy-popup__close:hover,
+.privacy-popup__close:focus {
+  opacity: 1;
+  outline: 2px solid var(--popup-link-color, #007ace);
+  outline-offset: 1px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .privacy-popup {
+    max-width: calc(100vw - 40px);
+    margin: 0 20px;
+  }
+  
+  .privacy-popup--left,
+  .privacy-popup--right {
+    left: 20px;
+    right: 20px;
+    transform: translateY(-50%);
+  }
+  
+  .privacy-popup--left[aria-hidden="false"],
+  .privacy-popup--right[aria-hidden="false"] {
+    transform: translateY(-50%);
+  }
+  
+  .privacy-popup__actions {
+    flex-direction: column;
+  }
+  
+  .privacy-popup__button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .privacy-popup {
+    border-width: 2px;
+    border-color: currentColor;
+  }
+  
+  .privacy-popup__button {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .privacy-popup {
+    transition: none;
+  }
+}
+
+/* Focus management */
+.privacy-popup:focus {
+  outline: 3px solid var(--popup-link-color, #007ace);
+  outline-offset: 2px;
+}

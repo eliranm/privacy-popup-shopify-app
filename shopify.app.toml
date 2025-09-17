@@ -1,0 +1,36 @@
+# Learn more about configuring your Shopify app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "Privacy Popup"
+client_id = "{{SHOPIFY_API_KEY}}"
+application_url = "{{SHOPIFY_APP_URL}}"
+embedded = true
+
+[access_scopes]
+# https://shopify.dev/docs/api/usage/access-scopes
+scopes = "write_themes,read_themes,write_own_subscription_contracts"
+
+[auth]
+redirect_urls = [
+  "{{SHOPIFY_APP_URL}}/api/auth",
+  "{{SHOPIFY_APP_URL}}/api/auth/callback",
+]
+
+[webhooks]
+api_version = "2023-10"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "{{DEV_STORE_URL}}"
+include_config_on_deploy = true
+
+[[extensions]]
+type = "theme_app_extension"
+name = "Privacy Popup"
+handle = "privacy-popup"
+
+[extensions.metafields]
+
+[extensions.settings]

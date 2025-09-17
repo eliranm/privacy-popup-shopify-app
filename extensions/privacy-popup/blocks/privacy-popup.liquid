@@ -1,0 +1,153 @@
+{% comment %}
+Privacy Popup App Embed Block
+Renders a customizable privacy notice overlay
+{% endcomment %}
+
+<div 
+  id="privacy-popup-container"
+  class="privacy-popup-container"
+  data-message="{{ block.settings.message | escape }}"
+  data-link-url="{{ block.settings.link_url | escape }}"
+  data-position="{{ block.settings.position }}"
+  data-max-width="{{ block.settings.max_width }}"
+  data-padding="{{ block.settings.padding }}"
+  data-z-index="{{ block.settings.z_index }}"
+  data-dismissible="{{ block.settings.dismissible }}"
+  data-bg-color="{{ block.settings.bg_color }}"
+  data-text-color="{{ block.settings.text_color }}"
+  data-link-color="{{ block.settings.link_color }}"
+  style="display: none;"
+>
+</div>
+
+{{ 'privacy-popup.css' | asset_url | stylesheet_tag }}
+
+<script>
+  // Inline critical initialization to prevent FOUC
+  (function() {
+    'use strict';
+    
+    const container = document.getElementById('privacy-popup-container');
+    if (!container) return;
+    
+    // Check if popup was already dismissed
+    const dismissedKey = 'privacy-popup-dismissed';
+    const isDismissed = localStorage.getItem(dismissedKey) === 'true';
+    
+    if (isDismissed && container.dataset.dismissible === 'true') {
+      return; // Don't show if dismissed and dismissible
+    }
+    
+    // Load the full popup script
+    const script = document.createElement('script');
+    script.src = '{{ "privacy-popup.js" | asset_url }}';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Privacy Popup",
+  "target": "body",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "message",
+      "label": "Privacy Message",
+      "default": "We use cookies to enhance your browsing experience and analyze our traffic. By continuing to use our site, you consent to our use of cookies.",
+      "info": "The message displayed in the privacy popup"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Privacy Policy URL",
+      "default": "/pages/privacy-policy",
+      "info": "Link to your privacy policy page"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "bottom",
+      "info": "Where to position the popup on screen"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 200,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximum Width",
+      "default": 400,
+      "info": "Maximum width of the popup"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding",
+      "default": 20,
+      "info": "Internal padding of the popup"
+    },
+    {
+      "type": "number",
+      "id": "z_index",
+      "label": "Z-Index",
+      "default": 9999,
+      "info": "Stacking order (higher numbers appear on top)"
+    },
+    {
+      "type": "checkbox",
+      "id": "dismissible",
+      "label": "Allow Dismissal",
+      "default": true,
+      "info": "Allow users to close the popup permanently"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff",
+      "info": "Background color of the popup"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#333333",
+      "info": "Color of the message text"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link Color",
+      "default": "#007ace",
+      "info": "Color of the privacy policy link"
+    }
+  ]
+}
+{% endschema %}

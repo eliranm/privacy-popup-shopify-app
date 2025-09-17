@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  shop        String
+  state       String
+  isOnline    Boolean  @default(false)
+  scope       String?
+  expires     DateTime?
+  accessToken String
+  userId      BigInt?
+  firstName   String?
+  lastName    String?
+  email       String?
+  accountOwner Boolean @default(false)
+  locale      String?
+  collaborator Boolean? @default(false)
+  emailVerified Boolean? @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([shop, isOnline])
+  @@map("sessions")
+}
+
+model Shop {
+  id                    String         @id @default(cuid())
+  shopifyDomain         String         @unique
+  name                  String?
+  email                 String?
+  domain                String?
+  province              String?
+  country               String?
+  address1              String?
+  zip                   String?
+  city                  String?
+  source                String?
+  phone                 String?
+  latitude              Float?
+  longitude             Float?
+  primaryLocale         String?
+  timezone              String?
+  iana_timezone         String?
+  currency              String?
+  currencySymbol        String?
+  moneyFormat           String?
+  moneyWithCurrencyFormat String?
+  weightUnit            String?
+  planName              String?
+  planDisplayName       String?
+  passwordEnabled       Boolean?
+  hasStorefront         Boolean?
+  eligibleForCardReaderGiveaway Boolean?
+  eligibleForPayments   Boolean?
+  googleAppsDomain      String?
+  googleAppsLoginEnabled Boolean?
+  moneyInEmailsFormat   String?
+  moneyWithCurrencyInEmailsFormat String?
+  taxable               Boolean?
+  taxShipping           Boolean?
+  countyTaxes           Boolean?
+  setupRequired         Boolean?
+  checkoutApiSupported  Boolean?
+  multiLocationEnabled  Boolean?
+  hasDiscounts          Boolean?
+  hasGiftCards          Boolean?
+  myshopifyDomain       String
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  
+  // Relations
+  subscriptions         Subscription[]
+  settings              Setting[]
+  auditLogs            AuditLog[]
+
+  @@map("shops")
+}
+
+model Subscription {
+  id                    String            @id @default(cuid())
+  shopId                String
+  shopifySubscriptionId String            @unique
+  name                  String
+  status                SubscriptionStatus
+  currentPeriodEnd      DateTime?
+  trialEnd              DateTime?
+  test                  Boolean           @default(false)
+  price                 Decimal           @db.Decimal(10, 2)
+  currency              String            @default("USD")
+  interval              String            @default("EVERY_30_DAYS")
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  
+  // Relations
+  shop                  Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  shopId    String
+  key       String
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, key])
+  @@map("settings")
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  shopId    String
+  action    String
+  resource  String?
+  resourceId String?
+  details   Json?
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime    @default(now())
+  
+  // Relations
+  shop      Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  FROZEN
+  PAUSED
+}

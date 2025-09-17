@@ -1,0 +1,86 @@
+{
+  "name": "privacy-popup-shopify-app",
+  "version": "1.0.0",
+  "description": "A Shopify app that adds a customizable privacy popup to storefronts",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "shopify app dev",
+    "start": "next start",
+    "lint": "next lint && eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "next lint --fix && eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
+    "db:seed": "tsx prisma/seed.ts",
+    "prepare": "husky install",
+    "release": "semantic-release"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.6.0",
+    "@shopify/admin-api-client": "^0.2.6",
+    "@shopify/app-bridge": "^4.1.2",
+    "@shopify/app-bridge-react": "^4.1.2",
+    "@shopify/polaris": "^13.0.0",
+    "@shopify/shopify-app-remix": "^3.0.0",
+    "@shopify/shopify-app-session-storage-prisma": "^4.0.3",
+    "next": "^14.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@playwright/test": "^1.40.1",
+    "@shopify/cli": "^3.51.0",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0",
+    "eslint-config-next": "^14.0.3",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.1.0",
+    "prettier": "^3.1.0",
+    "prisma": "^5.6.0",
+    "semantic-release": "^22.0.8",
+    "tsx": "^4.6.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "commitlint": {
+    "extends": ["@commitlint/config-conventional"]
+  },
+  "release": {
+    "branches": ["main"],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "privacy_popup": {
+    "name": "Privacy Popup",
+    "settings": {
+      "message": {
+        "label": "Privacy Message",
+        "info": "The message displayed in the privacy popup"
+      },
+      "link_url": {
+        "label": "Privacy Policy URL",
+        "info": "Link to your privacy policy page"
+      },
+      "position": {
+        "label": "Position",
+        "info": "Where to position the popup on screen",
+        "options": {
+          "top": "Top",
+          "bottom": "Bottom",
+          "left": "Left",
+          "right": "Right"
+        }
+      },
+      "max_width": {
+        "label": "Maximum Width",
+        "info": "Maximum width of the popup"
+      },
+      "padding": {
+        "label": "Padding",
+        "info": "Internal padding of the popup"
+      },
+      "z_index": {
+        "label": "Z-Index",
+        "info": "Stacking order (higher numbers appear on top)"
+      },
+      "dismissible": {
+        "label": "Allow Dismissal",
+        "info": "Allow users to close the popup permanently"
+      },
+      "bg_color": {
+        "label": "Background Color",
+        "info": "Background color of the popup"
+      },
+      "text_color": {
+        "label": "Text Color",
+        "info": "Color of the message text"
+      },
+      "link_color": {
+        "label": "Link Color",
+        "info": "Color of the privacy policy link"
+      }
+    }
+  }
+}
